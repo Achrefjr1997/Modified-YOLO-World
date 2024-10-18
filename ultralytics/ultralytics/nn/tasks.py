@@ -72,7 +72,9 @@ from ultralytics.nn.modules import (
     AMFF_2,
     AMFF_1,
     FeatureAdaptationBlock,
-    AttentionFeatureFusion
+    AttentionFeatureFusion,
+    C3k2Attn,C3k2
+
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, colorstr, emojis, yaml_load
 from ultralytics.utils.checks import check_requirements, check_suffix, check_yaml
@@ -672,7 +674,7 @@ class WorldModel(DetectionModel):
                 x = y[m.f] if isinstance(m.f, int) else [x if j == -1 else y[j] for j in m.f]  # from earlier layers
             if profile:
                 self._profile_one_layer(m, x, dt)
-            if isinstance(m, (C2fAttn,C2fDCNAttn,C2fCA2ttn,C2fCA1ttn,C2fttn1,C2fttn2)):
+            if isinstance(m, (C2fAttn,C2fDCNAttn,C2fCA2ttn,C2fCA1ttn,C2fttn1,C2fttn2,C3k2Attn)):
                 x = m(x, txt_feats)
             elif isinstance(m, WorldDetect):
                 x = m(x, ori_txt_feats)
@@ -990,22 +992,26 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             C2fttn2,
             C2fttn1,
             FeatureAdaptationBlock,
-            AttentionFeatureFusion
+            AttentionFeatureFusion,
+            C3k2Attn,
+            C3k2
 
         }:
             c1, c2 = ch[f], args[0]
             if c2 != nc:  # if c2 not equal to number of classes (i.e. for Classify() output)
                 c2 = make_divisible(min(c2, max_channels) * width, 8)
-            if m in {C2fAttn,C2fDCNAttn,C2fCA2ttn,C2fCA1ttn,C2fttn2,C2fttn1}:
+            if m in {C2fAttn,C2fDCNAttn,C2fCA2ttn,C2fCA1ttn,C2fttn2,C2fttn1,C3k2Attn}:
                 args[1] = make_divisible(min(args[1], max_channels // 2) * width, 8)  # embed channels
                 args[2] = int(
                     max(round(min(args[2], max_channels // 2 // 32)) * width, 1) if args[2] > 1 else args[2]
                 )  # num heads
 
             args = [c1, c2, *args[1:]]
-            if m in {BottleneckCSP,C2fttn2,C2fttn1,AttentionFeatureFusion,FeatureAdaptationBlock, C1, C2,C2fCA2ttn,C2fCA1ttn,C2f_CA2_DCN,C2f_CA1_DCN, C2f_CA_DCN,C2f_CA2,C2f_CA1,C2f_CA,C2f, C2fDCNAttn,C2fAttn, C3, C3TR, C3Ghost, C3x, RepC3, C2fCIB}:
+            if m in {BottleneckCSP,C3k2Attn,C3k2,C2fttn2,C2fttn1,AttentionFeatureFusion,FeatureAdaptationBlock, C1, C2,C2fCA2ttn,C2fCA1ttn,C2f_CA2_DCN,C2f_CA1_DCN, C2f_CA_DCN,C2f_CA2,C2f_CA1,C2f_CA,C2f, C2fDCNAttn,C2fAttn, C3, C3TR, C3Ghost, C3x, RepC3, C2fCIB}:
                 args.insert(2, n)  # number of repeats
                 n = 1
+            if m in {C3k2} :  
+                args[3] = True
 
             
         elif m is AIFI:
