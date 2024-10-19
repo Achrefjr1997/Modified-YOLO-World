@@ -73,7 +73,7 @@ from ultralytics.nn.modules import (
     AMFF_1,
     FeatureAdaptationBlock,
     AttentionFeatureFusion,
-    C3k2Attn,C3k2
+    C3k2Attn,C3k2,C2PSA
 
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, colorstr, emojis, yaml_load
@@ -994,7 +994,8 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             FeatureAdaptationBlock,
             AttentionFeatureFusion,
             C3k2Attn,
-            C3k2
+            C3k2,
+            C2PSA
 
         }:
             c1, c2 = ch[f], args[0]
@@ -1007,7 +1008,7 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
                 )  # num heads
 
             args = [c1, c2, *args[1:]]
-            if m in {BottleneckCSP,C3k2Attn,C3k2,C2fttn2,C2fttn1,AttentionFeatureFusion,FeatureAdaptationBlock, C1, C2,C2fCA2ttn,C2fCA1ttn,C2f_CA2_DCN,C2f_CA1_DCN, C2f_CA_DCN,C2f_CA2,C2f_CA1,C2f_CA,C2f, C2fDCNAttn,C2fAttn, C3, C3TR, C3Ghost, C3x, RepC3, C2fCIB}:
+            if m in {BottleneckCSP,C3k2Attn,C3k2,C2fttn2,C2PSA,C2fttn1,AttentionFeatureFusion,FeatureAdaptationBlock, C1, C2,C2fCA2ttn,C2fCA1ttn,C2f_CA2_DCN,C2f_CA1_DCN, C2f_CA_DCN,C2f_CA2,C2f_CA1,C2f_CA,C2f, C2fDCNAttn,C2fAttn, C3, C3TR, C3Ghost, C3x, RepC3, C2fCIB}:
                 args.insert(2, n)  # number of repeats
                 n = 1
             if m in {C3k2} :  

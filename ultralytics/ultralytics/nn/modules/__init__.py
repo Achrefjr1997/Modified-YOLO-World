@@ -20,7 +20,7 @@ from .DCNv3_modules import (AMFF_2,AMFF_1,C2fttn2,C2fttn1,DCNV3_YoLo,
                             C2fCA2ttn,C2fCA1ttn, Bottleneck_DCNV3, DCNV3,
                             C2fDCNAttn,C2f_CA,C2f_CA_DCN,C2f_CA2,C2f_CA1,
                             C2f_CA2_DCN,C2f_CA1_DCN,FeatureAdaptationBlock,
-                            AttentionFeatureFusion,C3k2Attn,C3k2)
+                            AttentionFeatureFusion,C3k2Attn,C3k2,C2PSA)
 
 from .block import (
     C1,
@@ -167,5 +167,6 @@ __all__ = (
     "C2fttn2",
     "C2fttn1",
     "AMFF_2",
-    "AMFF_1"
+    "AMFF_1",
+    "C2PSA"
 )
