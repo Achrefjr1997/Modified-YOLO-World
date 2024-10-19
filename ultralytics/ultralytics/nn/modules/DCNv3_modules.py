@@ -643,7 +643,7 @@ class AMFF_2(nn.Module):
 
 ##############################################
 
-class Attention1(nn.Module):
+class Attention(nn.Module):
     def __init__(self, in_planes, out_planes, kernel_size, groups=1, reduction=0.0625, kernel_num=4, min_channel=16):
         super(Attention, self).__init__()
         attention_channel = max(int(in_planes * reduction), min_channel)
@@ -734,7 +734,7 @@ class ODConv2d(nn.Module):
         self.dilation = dilation
         self.groups = groups
         self.kernel_num = kernel_num
-        self.attention = Attention1(in_planes, out_planes, kernel_size, groups=groups,
+        self.attention = Attention(in_planes, out_planes, kernel_size, groups=groups,
                                    reduction=reduction, kernel_num=kernel_num)
         self.weight = nn.Parameter(torch.randn(kernel_num, out_planes, in_planes//groups, kernel_size, kernel_size),
                                    requires_grad=True)
@@ -1082,7 +1082,7 @@ class C2PSA(nn.Module):
         >>> output_tensor = c2psa(input_tensor)
     """
 
-    def __init__(self, c1, c2, n=1, e=0.5):
+    def __init__(self, c1, c2, n=1, e=1):
         """Initializes the C2PSA module with specified input/output channels, number of layers, and expansion ratio."""
         super().__init__()
         assert c1 == c2
@@ -1090,7 +1090,7 @@ class C2PSA(nn.Module):
         self.cv1 = Conv(c1, 2 * self.c, 1, 1)
         self.cv2 = Conv(2 * self.c, c1, 1)
 
-        self.m = nn.Sequential(*(PSABlock(self.c, attn_ratio=0.5, num_heads=self.c // 64) for _ in range(n)))
+        self.m = nn.Sequential(*(PSABlock(self.c, attn_ratio=0.5, num_heads=self.c // 32) for _ in range(n)))
 
     def forward(self, x):
         """Processes the input tensor 'x' through a series of PSA blocks and returns the transformed tensor."""
@@ -1133,3 +1133,5 @@ class PSABlock(nn.Module):
         x = x + self.attn(x) if self.add else self.attn(x)
         x = x + self.ffn(x) if self.add else self.ffn(x)
         return x
+
+
