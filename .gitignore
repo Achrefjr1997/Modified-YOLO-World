@@ -1,4 +1,11 @@
-ultralytics/build
-ultralytics/ultralytics.egg-info
-.ipynb_checkpoints
+# Ignore the build folder in ultralytics
+ultralytics/build/
+
+# Ignore the egg-info folder in ultralytics
+ultralytics/ultralytics.egg-info/
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore specific notebook file
 Untitled.ipynb
