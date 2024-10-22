@@ -1,0 +1,41 @@
+# Ultralytics YOLO 🚀, AGPL-3.0 license
+# YOLOv8-World-v2 object detection model with P3-P5 outputs. For details see https://docs.ultralytics.com/tasks/detect
+
+# Parameters
+nc: 1 # number of classes
+scales: # model compound scaling constants, i.e. 'model=yolov8n.yaml' will call yolov8.yaml with scale 'n'
+  # [depth, width, max_channels]
+  n: [0.33, 0.25, 1024] # YOLOv8n summary: 225 layers,  3157200 parameters,  3157184 gradients,   8.9 GFLOPs
+
+
+# YOLOv8.0n backbone
+backbone:
+  # [from, repeats, module, args]
+  - [-1, 1, Conv, [64, 3, 2]] # 0-P1/2
+  - [-1, 1, Conv, [128, 3, 2]] # 1-P2/4
+  - [-1, 3, ACAM, [128, True]]
+  - [-1, 1, Conv, [256, 3, 2]] # 3-P3/8
+  - [-1, 6, ACAM, [256, True]]
+  - [-1, 1, Conv, [512, 3, 2]] # 5-P4/16
+  - [-1, 6, ACAM, [512, True]]
+  - [-1, 1, SPPF, [1024, 5]] # 9 
+
+
+# YOLOv8.0n head
+head:
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  - [[-1, 4], 1, Concat, [1]] # cat backbone P4
+  - [-1, 3, C2fAttn, [512, 256, 8]] # 12
+
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  - [[-1, 2], 1, Concat, [1]] # cat backbone P3
+  - [-1, 3, C2fAttn, [256, 128, 4]] # 13 (P3/8-small)
+
+  - [-1, 1, Conv, [256, 3, 2]]
+  - [[-1, 10], 1, Concat, [1]] # cat head P4
+  - [-1, 3, C2fAttn, [512, 256, 8]] # 16 (P4/16-medium)
+
+  - [[13,16], 1, AMFF_2,[256]] 
+  - [[13,16], 1, AMFF_1,[256]] 
+
+  - [[-2, -1], 1, WorldDetect, [nc, 512, True]] 
