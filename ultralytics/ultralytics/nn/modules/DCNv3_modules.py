@@ -1186,3 +1186,37 @@ class MEAP(nn.Module):
         
         return output
 
+class ACAM(nn.Module):
+    def __init__(self, c1, c2, n=1, shortcut=True, g=1, e=0.5):
+        super(ACAM, self).__init__()
+        
+        # Convolution operation for attention weights
+        self.conv = nn.Conv2d(c1, c1, kernel_size=1)
+        
+        # Global Max Pooling for generating attention weights
+        self.global_max_pool = nn.AdaptiveMaxPool2d(1)
+        
+        # Multiple Bottleneck layers using ModuleList
+        self.attention_conv = nn.ModuleList([Bottleneck(c1, c1, shortcut, g, k=(3, 3), e=1.0) for _ in range(n)])
+        
+        # Sigmoid activation for scaling attention weights
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        # Global Max Pooling to create attention weights
+        attn_weights = self.global_max_pool(x)
+        
+        # Pass the attention weights through a 1x1 convolution
+        attn_weights = self.conv(attn_weights)
+        
+        # Apply sigmoid to the attention weights
+        attn_weights = self.sigmoid(attn_weights)
+        
+        # Apply each Bottleneck layer from the ModuleList to the input
+        for layer in self.attention_conv:
+            x = layer(x)
+        
+        # Multiply the feature map with the attention weights
+        out = x * attn_weights.expand_as(x)
+        
+        return out

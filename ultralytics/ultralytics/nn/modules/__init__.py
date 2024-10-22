@@ -21,7 +21,7 @@ from .DCNv3_modules import (AMFF_2,AMFF_1,C2fttn2,C2fttn1,DCNV3_YoLo,
                             C2fDCNAttn,C2f_CA,C2f_CA_DCN,C2f_CA2,C2f_CA1,
                             C2f_CA2_DCN,C2f_CA1_DCN,FeatureAdaptationBlock,
                             AttentionFeatureFusion,C3k2,C2PSA,C3k2Attn,
-                            MEAP,MEAC)
+                            MEAP,MEAC,ACAM)
 
 from .block import (
     C1,
@@ -172,5 +172,5 @@ __all__ = (
     "C2PSA",
     "C3k2Attn",
     "C3k2",
-    "MEAP","MEAC"
+    "MEAP","MEAC","ACAM"
 )
